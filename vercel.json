@@ -1,12 +1,15 @@
 {
-    "experimentalServices": {
-        "frontend": {
-            "routePrefix": "/",
-            "framework": "vite"
-        },
-        "backend": {
-            "entrypoint": "backend/main.py",
-            "routePrefix": "/_/backend"
-        }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/_/backend/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
+  ]
 }
