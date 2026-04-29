@@ -2,7 +2,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import get_db, get_history_collection, is_mongodb_enabled
 from app.dependencies import get_predictor
 from app.models.db_models import PredictionHistory
 from app.schemas.input_schema import PredictionInput
@@ -27,6 +27,18 @@ def predict(data: PredictionInput, predictor=Depends(get_predictor)):
 def save_entry(data: PredictionInput, db: Session = Depends(get_db), predictor=Depends(get_predictor)):
   try:
     result = predictor.predict(data.model_dump())
+    if is_mongodb_enabled():
+      collection = get_history_collection()
+      document = {
+        **data.model_dump(),
+        "risk_level": result["risk_level"],
+        "confidence_score": result["confidence_score"],
+        "top_contributing_features": result["top_contributing_features"],
+        "created_at": now_utc(),
+      }
+      inserted = collection.insert_one(document)
+      return {"id": str(inserted.inserted_id), "message": "Entry saved successfully."}
+
     record = PredictionHistory(
       **data.model_dump(),
       risk_level=result["risk_level"],

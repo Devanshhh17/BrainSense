@@ -6,6 +6,7 @@ import GlowButton from "../components/GlowButton";
 import RangeSlider from "../components/RangeSlider";
 import SectionWrapper from "../components/SectionWrapper";
 import usePageTitle from "../hooks/usePageTitle";
+import { mapFormToPredictionPayload, predict, saveEntry } from "../services/api";
 
 const initialForm = {
   dailyScreenTime: 5,
@@ -30,20 +31,38 @@ function InputFormPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
     if (Number(form.dailyScreenTime) <= 0 || Number(form.sleepQuality) < 0) {
       setError("Please provide valid numeric values for required metrics.");
       return;
     }
+
     setError("");
-    navigate("/results");
+    setLoading(true);
+
+    const payload = mapFormToPredictionPayload(form);
+
+    try {
+      const prediction = await predict(payload);
+      sessionStorage.setItem("lastPrediction", JSON.stringify({ prediction, input: form }));
+      navigate("/results", { state: { prediction, input: form } });
+
+      saveEntry(payload).catch((saveError) => {
+        console.warn("Prediction saved failed", saveError);
+      });
+    } catch (submitError) {
+      setError(submitError.message || "Unable to connect to backend. Please make sure the API server is running.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,7 +100,9 @@ function InputFormPage() {
         {error && <p className="text-sm text-rose-300">{error}</p>}
 
         <div className="flex justify-end">
-          <GlowButton type="submit" size="lg">Generate Prediction</GlowButton>
+          <GlowButton type="submit" size="lg" disabled={loading}>
+            {loading ? "Generating..." : "Generate Prediction"}
+          </GlowButton>
         </div>
       </form>
     </SectionWrapper>

@@ -119,6 +119,21 @@ FastAPI docs:
 - Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - ReDoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
+## MongoDB Integration
+
+The backend can store prediction history in MongoDB when `MONGODB_URI` is configured. If the variable is not set, the project continues using the local SQLite fallback.
+
+Set the connection string before running the backend:
+
+```powershell
+$env:MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+$env:MONGODB_DB_NAME = "brainsense"
+$env:MONGODB_COLLECTION = "prediction_history"
+uvicorn app.main:app --reload
+```
+
+For example, use your Atlas URI without embedding it in the repository.
+
 ## Generate Synthetic Dataset
 
 ```bash

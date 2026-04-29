@@ -16,7 +16,10 @@ function FuturisticInput({
         <span className="text-xs text-white/45">{helperText}</span>
       </div>
       <input
+        id={name}
         type={type}
+        inputMode={type === "number" ? "decimal" : undefined}
+        pattern={type === "number" ? "[0-9]*" : undefined}
         name={name}
         value={value}
         min={min}

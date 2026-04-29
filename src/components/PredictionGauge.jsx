@@ -1,7 +1,8 @@
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from "recharts";
 
 function PredictionGauge({ value }) {
-  const data = [{ name: "confidence", value, fill: "#2dd4ff" }];
+  const percent = typeof value === "number" && value <= 1 ? Number((value * 100).toFixed(1)) : value;
+  const data = [{ name: "confidence", value: percent, fill: "#2dd4ff" }];
 
   return (
     <div className="h-72">
@@ -21,7 +22,7 @@ function PredictionGauge({ value }) {
         </RadialBarChart>
       </ResponsiveContainer>
       <div className="text-center -mt-32">
-        <p className="text-4xl font-bold text-cyan-300">{value}%</p>
+        <p className="text-4xl font-bold text-cyan-300">{percent}%</p>
         <p className="text-sm text-white/65 mt-1">Model confidence</p>
       </div>
     </div>

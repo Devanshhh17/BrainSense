@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import GlassCard from "../components/GlassCard";
@@ -6,21 +6,55 @@ import NeonBadge from "../components/NeonBadge";
 import SectionWrapper from "../components/SectionWrapper";
 import { historyRecords, riskHistory } from "../data/mockData";
 import usePageTitle from "../hooks/usePageTitle";
+import { getHistory } from "../services/api";
 
 function HistoryPage() {
   usePageTitle("History");
+  const [records, setRecords] = useState(historyRecords);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
+  const [fetchError, setFetchError] = useState("");
+
+  useEffect(() => {
+    getHistory()
+      .then((items) => {
+        if (!Array.isArray(items) || items.length === 0) {
+          return;
+        }
+
+        const normalized = items.map((record) => {
+          const confidenceValue = Number(record.confidence_score);
+          const confidence = confidenceValue <= 1 ? Number((confidenceValue * 100).toFixed(1)) : confidenceValue;
+
+          return {
+            ...record,
+            id: record.id,
+            date: new Date(record.created_at).toLocaleDateString(),
+            risk: record.risk_level,
+            confidence,
+            factors: Array.isArray(record.top_factors)
+              ? record.top_factors.map((factor) => factor.feature || factor)
+              : [],
+          };
+        });
+
+        setRecords(normalized);
+      })
+      .catch((error) => {
+        setFetchError("Unable to load history from backend. Using mock data.");
+        console.warn(error);
+      });
+  }, []);
 
   const filtered = useMemo(() => {
-    return historyRecords.filter((record) => {
-      const matchesQuery =
-        record.id.toLowerCase().includes(query.toLowerCase()) ||
-        record.factors.join(" ").toLowerCase().includes(query.toLowerCase());
+    return records.filter((record) => {
+      const idMatches = String(record.id).toLowerCase().includes(query.toLowerCase());
+      const factorMatches = record.factors?.join(" ").toLowerCase().includes(query.toLowerCase());
+      const matchesQuery = idMatches || factorMatches;
       const matchesFilter = filter === "All" || record.risk === filter;
       return matchesQuery && matchesFilter;
     });
-  }, [query, filter]);
+  }, [query, filter, records]);
 
   return (
     <SectionWrapper>
@@ -62,6 +96,7 @@ function HistoryPage() {
               <option>Elevated</option>
             </select>
           </div>
+          {fetchError && <p className="text-sm text-rose-300 mt-4">{fetchError}</p>}
         </GlassCard>
       </div>
 
