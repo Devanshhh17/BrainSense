@@ -15,8 +15,8 @@ const processes = [
   },
   {
     name: "frontend",
-    command: "npm run dev:frontend",
-    cwd: rootDir,
+    command: "npm run dev",
+    cwd: path.join(rootDir, "frontend"),
   },
 ];
 
