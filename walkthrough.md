@@ -47,9 +47,6 @@ graph TD
 ### 4. Vercel Monorepo Settings
 - Updated [vercel.json](file:///c:/Users/devan/OneDrive/Desktop/BrainSense/vercel.json) configuration at the workspace root to include `"entrypoint": "frontend"` for the frontend project definition, preserving Vercel's automated builds and routing mappings.
 
-### 5. CI/CD Pipeline Configuration
-- Updated [.github/workflows/deploy.yml](file:///c:/Users/devan/OneDrive/Desktop/BrainSense/.github/workflows/deploy.yml) to configure `working-directory: frontend` and adjusted the artifact upload path to `frontend/dist/`. This ensures the automated GitHub Actions pipeline successfully installs packages, builds, and deploys the frontend under the refactored directory structure.
-
 ### 3. Glassmorphic Top Navigation
 - Added a workspace dropdown ("All Features") on the left of [Topbar.jsx](file:///c:/Users/devan/OneDrive/Desktop/BrainSense/frontend/src/components/layout/Topbar.jsx).
 - Embedded a console search field, Calendar action icon, bell notification dot indicator, and dropdown-enabled profile avatar.
